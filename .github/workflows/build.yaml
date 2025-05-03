@@ -2,6 +2,7 @@ name: Build and Push Docker image to Docker Hub
 
 on: push
 
+
 jobs:
   push_to_registry:
     name: Push Docker image to Docker Hub
@@ -18,7 +19,7 @@ jobs:
     
       - name: Set short SHA
         id: vars
-        run: echo "SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
+        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
     
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
@@ -26,5 +27,21 @@ jobs:
           context: ./
           push: true
           tags: |
-                kalharacodes/docker-automation:${{ env.SHORT_SHA }}
-                kalharacodes/docker-automation:latest
+                lokumalage1k12139/docker-automation:${{ env.SHORT_SHA }}
+                lokumalage1k12139/docker-automation:latest
+
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      - name: Commit changes
+        run: |
+          git add .
+          git commit -m "Update from GitHub Actions" || echo "No changes to commit"
+
+      - name: Push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: git push origin HEAD
+
